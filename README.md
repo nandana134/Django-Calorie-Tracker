@@ -61,6 +61,7 @@ pip install -r requirements.txt
 ### 4. Run Migrations
 
 python manage.py makemigrations
+
 python manage.py migrate
 
 ### 5. Create Superuser(Optional for Admin Panel)
