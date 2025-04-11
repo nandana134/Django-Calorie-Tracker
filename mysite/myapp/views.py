@@ -201,3 +201,8 @@ def set_calorie_goal(request):
         form = CalorieGoalForm(instance=profile)
 
     return render(request, 'myapp/set_goal.html', {'form': form})
+
+def home(request):
+    foods = Food.objects.all()
+    print("Number of foods:", foods.count())  # 🔥 Add this line
+    return render(request, 'tracker/home.html', {'foods': foods})
