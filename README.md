@@ -48,7 +48,10 @@ cd django-calorie-tracker/mysite
 ### 2. Create Virtual Environment
 
 python -m venv venv
+
 venv\Scripts\activate     # On Windows
+
+
 source venv/bin/activate  # On Mac/Linux
 
 ### 3. Install Requirements
@@ -77,7 +80,7 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'youremail@gmail.com'
-EMAIL_HOST_PASSWORD = 'yourpassword'(16 char Google app password not original password)
+EMAIL_HOST_PASSWORD = 'yourpassword'(16 char Google app password without spaces not original password)
 
 You can schedule the email reminder script using a cron job or Windows Task Scheduler to run every day at 7 PM.
 
