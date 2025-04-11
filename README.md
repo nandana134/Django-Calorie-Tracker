@@ -74,16 +74,19 @@ python manage.py runserver
 
 Visit http://127.0.0.1:8000/ in your browser.
 
-**Email Reminder Setup (for Daily Reminders)**
+### Email Reminder Setup (for Daily Reminders)
 
+```
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'youremail@gmail.com'
-EMAIL_HOST_PASSWORD = 'yourpassword'(16 char Google app password without spaces not original password)
+EMAIL_HOST_PASSWORD = 'yourpassword'  # (16-char Google app password, not your original password)
+```
 
-You can schedule the email reminder script using a cron job or Windows Task Scheduler to run every day at 7 PM.
+You can schedule the email reminder script using a **cron job** or **Windows Task Scheduler** to run every day at **7 PM**.
+
 
 **License**
 
