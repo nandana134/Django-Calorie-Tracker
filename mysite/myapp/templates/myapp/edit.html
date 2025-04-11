@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Food Entry</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+</head>
+<body>
+<div class="container mt-5">
+    <nav class="navbar navbar-dark bg-info mb-4">
+        <span class="navbar-brand">Edit Consumed Food</span>
+        <a href="{% url 'index' %}" class="btn btn-light">🏠 Home</a>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <form method="POST">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="food">Select Food Item</label>
+                    <select class="form-control" name="food_consumed" id="food">
+                        {% for food in foods %}
+                            <option value="{{ food.name }}" {% if food.name == selected_food %}selected{% endif %}>
+                                {{ food.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <button type="submit" class="btn btn-success">Update</button>
+                <a href="{% url 'index' %}" class="btn btn-secondary ml-2">Cancel</a>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>

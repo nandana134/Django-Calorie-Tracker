@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Calorie Tracker Report</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        h1, h2, h3 { text-align: center; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #333; padding: 8px; text-align: center; }
+        th { background-color: #f2f2f2; }
+        .summary, .goal-analysis { margin-top: 20px; }
+    </style>
+</head>
+<body>
+
+    <h1>Calorie Tracker Report</h1>
+    <h3>Generated for: {{ user.username }}</h3>
+    <h4>Date: {{ generated_on }}</h4>
+
+    <div class="summary">
+        <h2>User Summary</h2>
+        <p><strong>Email:</strong> {{ user.email }}</p>
+        <p><strong>Calorie Goal:</strong> {{ goal }}</p>
+        <p><strong>Report Duration:</strong> {{ report_duration }}</p>
+        <p><strong>Total Days Logged:</strong> {{ total_days }}</p>
+    </div>
+
+    <h2>Daily Logs</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Food Item</th>
+                <th>Carbs (g)</th>
+                <th>Protein (g)</th>
+                <th>Fats (g)</th>
+                <th>Calories (kcal)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for entry in history %}
+            <tr>
+                <td>{{ entry.timestamp|date:"Y-m-d" }}</td>
+                <td>{{ entry.food_consumed.name }}</td>
+                <td>{{ entry.food_consumed.carbs }}</td>
+                <td>{{ entry.food_consumed.protein }}</td>
+                <td>{{ entry.food_consumed.fats }}</td>
+                <td>{{ entry.food_consumed.calories }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="summary">
+        <h2>Overall Stats</h2>
+        <p><strong>Total Calories Consumed:</strong> {{ total_calories }}</p>
+        <p><strong>Average Calories Per Day:</strong> {{ average_calories }}</p>
+        <p><strong>Max Calories in a Day:</strong> {{ max_day.total }} ({{ max_day.date }})</p>
+        <p><strong>Most Frequently Consumed Food:</strong> {{ frequent_food }}</p>
+    </div>
+
+    <div class="goal-analysis">
+        <h2>Goal Analysis</h2>
+        <p><strong>Days Under Goal:</strong> {{ days_under_goal }}</p>
+        <p><strong>Days Over Goal:</strong> {{ days_over_goal }}</p>
+        <p style="color: {% if goal_message_type == 'warning' %}red{% else %}green{% endif %};">
+            <strong>{{ goal_message }}</strong>
+        </p>
+    </div>
+
+</body>
+</html>

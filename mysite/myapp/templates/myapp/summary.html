@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Daily Summary - Calorie Tracker</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+</head>
+<body>
+
+<div class="container mt-4">
+
+    <nav class="navbar navbar-dark bg-info mb-4">
+        <span class="navbar-brand">Calorie Tracker</span>
+        <a href="{% url 'index' %}" class="navbar-brand">Home</a>
+        <a href="{% url 'profile' %}" class="btn btn-light btn-sm">Profile</a>
+        <a href="{% url 'logout' %}" class="btn btn-light btn-sm">Logout</a>
+    </nav>
+
+    <h2 class="text-center mb-4">Today's Nutritional Summary</h2>
+
+    {% if summary.total_calories %}
+        <div class="card p-4 mb-4 shadow-sm">
+            <p><strong>Total Calories:</strong> {{ summary.total_calories|floatformat:2 }} kcal</p>
+            <p><strong>Total Protein:</strong> {{ summary.total_protein|default:0 }} g</p>
+            <p><strong>Total Carbs:</strong> {{ summary.total_carbs|default:0 }} g</p>
+            <p><strong>Total Fats:</strong> {{ summary.total_fats|default:0 }} g</p>
+        </div>
+
+        {% if user.userprofile.calorie_goal %}
+            {% if summary.total_calories > user.userprofile.calorie_goal %}
+                <div class="alert alert-danger">
+                    <strong>Warning:</strong> You've exceeded your daily calorie goal of {{ user.userprofile.calorie_goal }} kcal. 
+                    <a href="{% url 'set_goal' %}" class="btn btn-sm btn-light ml-2">Update Goal</a>
+                </div>
+            {% elif summary.total_calories > user.userprofile.calorie_goal|floatformat:"0"|add:"-100" %}
+                <div class="alert alert-warning">
+                    <strong>Almost there!</strong> You're close to your calorie limit ({{ user.userprofile.calorie_goal }} kcal). 
+                    <a href="{% url 'set_goal' %}" class="btn btn-sm btn-light ml-2">Update Goal</a>
+                </div>
+            {% else %}
+                <div class="alert alert-success">
+                    🎉 Great job! You're staying within your calorie goal of {{ user.userprofile.calorie_goal }} kcal. Keep it up!
+                    <a href="{% url 'set_goal' %}" class="btn btn-sm btn-light ml-2">Update Goal</a>
+                </div>
+            {% endif %}
+        {% else %}
+            <div class="alert alert-info">
+                You haven't set a calorie goal yet. 
+                <a href="{% url 'set_goal' %}" class="btn btn-sm btn-primary ml-2">Set Your Goal</a>
+            </div>
+        {% endif %}
+
+    {% else %}
+        <p class="text-center">No food items logged today.</p>
+    {% endif %}
+
+</div>
+
+</body>
+</html>

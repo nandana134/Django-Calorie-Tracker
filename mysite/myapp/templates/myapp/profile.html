@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Your Profile - Calorie Tracker</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+</head>
+<body>
+
+<div class="container">
+    <nav class="navbar navbar-dark bg-info mb-4">
+        <span class="navbar-brand">Calorie Tracker</span>
+        <a href="{% url 'index' %}" class="navbar-brand">Home</a>
+        <a href="{% url 'summary' %}" class="btn btn-light btn-sm">Daily Summary</a>
+        <a href="{% url 'logout' %}" class="btn btn-light btn-sm">Logout</a>
+    </nav>
+
+    <h2 class="text-center">Welcome, {{ user.username }}!</h2>
+    <h4 class="text-center mb-4">Your Consumption History</h4>
+
+    <div class="text-center mb-3">
+      <a href="{% url 'download_report' %}" class="btn btn-success">Download PDF</a>
+
+  </div>
+  
+
+    {% if history %}
+    <table class="table table-bordered table-striped">
+        <thead class="thead-dark">
+            <tr>
+                <th>Date & Time</th>
+                <th>Food Item</th>
+                <th>Carbs (g)</th>
+                <th>Protein (g)</th>
+                <th>Fats (g)</th>
+                <th>Calories (Kcal)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in history %}
+            <tr>
+                <td>{{ item.timestamp|date:"Y-m-d H:i" }}</td>
+                <td>{{ item.food_consumed.name }}</td>
+                <td>{{ item.food_consumed.carbs }}</td>
+                <td>{{ item.food_consumed.protein }}</td>
+                <td>{{ item.food_consumed.fats }}</td>
+                <td>{{ item.food_consumed.calories }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+        <p class="text-center">You haven't logged any food yet.</p>
+    {% endif %}
+</div>
+
+</body>
+</html>
