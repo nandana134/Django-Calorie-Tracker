@@ -68,10 +68,20 @@ python manage.py migrate
 
 python manage.py createsuperuser
 
+### 🧠 How to Add Food Data
+Note: The food data in food1.csv is for demonstration purposes only and may not be accurate or verified.
+Food items (used in the dropdown list) are stored in the database. You can import them using the following command:
+```
+python manage.py import_food
+```
+This reads from a CSV file (food1.csv) and populates the Food model.
+
+***🔐 Note: A temporary import_food_data view was added for deployment use only. It has been removed for security. Please use the custom command instead.***
+
 ### 6. Start the Server
-
+```
 python manage.py runserver
-
+```
 Visit http://127.0.0.1:8000/ in your browser.
 
 ### Email Reminder Setup (for Daily Reminders)
@@ -86,6 +96,15 @@ EMAIL_HOST_PASSWORD = 'yourpassword'  # (16-char Google app password, not your o
 ```
 
 You can schedule the email reminder script using a **cron job** or **Windows Task Scheduler** to run every day at **7 PM**.
+
+### 🌍 Deployment Notes
+This project was deployed on Render using GitHub integration.
+
+### 💡 Contributing
+Feel free to fork the project and open pull requests! Contributions are welcome to add features like:
+-🗓️ Weekly/Monthly summaries
+-📱 REST API support
+-📊 Export reports as Excel
 
 
 **License**
