@@ -41,33 +41,37 @@ A web application built with Django that allows users to track their daily calor
 ## 🚀 How to Run This Project Locally
 
 ### 1. Clone the Repository
-
+```
 git clone https://github.com/nandana134/django-calorie-tracker.git
+```
+```
 cd django-calorie-tracker/mysite
+```
 
 ### 2. Create Virtual Environment
-
+```
 python -m venv venv
-
+```
+```
 venv\Scripts\activate     # On Windows
 
-
 source venv/bin/activate  # On Mac/Linux
+````
 
 ### 3. Install Requirements
-
+```
 pip install -r requirements.txt
-
+```
 ### 4. Run Migrations
-
+```
 python manage.py makemigrations
 
 python manage.py migrate
-
+```
 ### 5. Create Superuser(Optional for Admin Panel)
-
+```
 python manage.py createsuperuser
-
+```
 ### 🧠 How to Add Food Data
 Note: The food data in food1.csv is for demonstration purposes only and may not be accurate or verified.
 Food items (used in the dropdown list) are stored in the database. You can import them using the following command:
