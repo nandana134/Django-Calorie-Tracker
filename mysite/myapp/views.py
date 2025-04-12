@@ -13,6 +13,7 @@ from datetime import timedelta
 from .forms import CalorieGoalForm
 from .forms import CustomUserCreationForm
 from collections import Counter
+from django.views.decorators.csrf import csrf_exempt 
 
 
 @login_required(login_url='login')
@@ -206,3 +207,27 @@ def home(request):
     foods = Food.objects.all()
     print("Number of foods:", foods.count())  # 🔥 Add this line
     return render(request, 'tracker/home.html', {'foods': foods})
+
+@csrf_exempt  # optional but safe for a temporary view without CSRF token
+def import_food_data(request):
+    import csv
+    import os
+
+    if request.method == 'GET':
+        file_path = os.path.join(os.path.dirname(__file__), 'food1.csv')
+        count = 0
+
+        with open(file_path, newline='', encoding='utf-8') as csvfile:
+            reader = csv.DictReader(csvfile)
+            for row in reader:
+                if not Food.objects.filter(name=row['food item']).exists():
+                    Food.objects.create(
+                        name=row['food item'],
+                        carbs=float(row['carbs']),
+                        protein=float(row['protien']),
+                        fats=float(row['fats']),
+                        calories=int(row['calories'])
+                    )
+                    count += 1
+        return HttpResponse(f"✅ Imported {count} food items successfully.")
+    return HttpResponse("⛔ Invalid request method. Use GET.")

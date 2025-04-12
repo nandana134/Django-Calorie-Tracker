@@ -19,6 +19,7 @@ from myapp import views
 from django.contrib.auth import views as auth_views  # type: ignore
 from myapp.views import generate_report_pdf
 
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.index, name='index'),
@@ -30,8 +31,9 @@ urlpatterns = [
     path('edit/<int:id>/', views.edit_consume, name='edit'), 
     path('summary/', views.daily_summary, name='summary'),    
     path('profile/', views.user_profile, name='profile'),
-     path('download-report/', generate_report_pdf, name='download_report'),
+    path('download-report/', generate_report_pdf, name='download_report'),
     path('set-goal/', views.set_calorie_goal, name='set_goal'),
+    path('import-food/', views.import_food_data, name='import-food'),
 
      
 ]
