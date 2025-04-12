@@ -17,7 +17,7 @@ from django.contrib import admin  # type: ignore
 from django.urls import path  # type: ignore
 from myapp import views
 from django.contrib.auth import views as auth_views  # type: ignore
-from myapp.views import generate_report_pdf
+from myapp.views import generate_report_pdf, import_food_data
 
 
 urlpatterns = [
@@ -33,7 +33,7 @@ urlpatterns = [
     path('profile/', views.user_profile, name='profile'),
     path('download-report/', generate_report_pdf, name='download_report'),
     path('set-goal/', views.set_calorie_goal, name='set_goal'),
-    path('import-food/', views.import_food_data, name='import-food'),
+    path('import-food/', import_food_data, name='import-food'),
 
      
 ]
