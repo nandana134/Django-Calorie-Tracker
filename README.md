@@ -110,6 +110,8 @@ Feel free to fork the project and open pull requests! Contributions are welcome 
 -📱 REST API support
 -📊 Export reports as Excel
 
+### Live Demo
+[Calorie Tracker on Render](https://django-calorie-tracker-3d1h.onrender.com//)
 
 **License**
 
