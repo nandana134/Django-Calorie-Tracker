@@ -205,7 +205,7 @@ def set_calorie_goal(request):
 
 def home(request):
     foods = Food.objects.all()
-    print("Number of foods:", foods.count())  # 🔥 Add this line
+    print("Number of foods:", foods.count())  #  Add this line
     return render(request, 'tracker/home.html', {'foods': foods})
 
 @csrf_exempt  # optional but safe for a temporary view without CSRF token
@@ -229,5 +229,5 @@ def import_food_data(request):
                         calories=int(row['calories'])
                     )
                     count += 1
-        return HttpResponse(f"✅ Imported {count} food items successfully.")
-    return HttpResponse("⛔ Invalid request method. Use GET.")
+        return HttpResponse(f" Imported {count} food items successfully.")
+    return HttpResponse(" Invalid request method. Use GET.")
