@@ -3,6 +3,7 @@
 <head>
     <title>Daily Summary - Calorie Tracker</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
 
@@ -26,34 +27,100 @@
         </div>
 
         {% if user.userprofile.calorie_goal %}
-            {% if summary.total_calories > user.userprofile.calorie_goal %}
-                <div class="alert alert-danger">
-                    <strong>Warning:</strong> You've exceeded your daily calorie goal of {{ user.userprofile.calorie_goal }} kcal. 
-                    <a href="{% url 'set_goal' %}" class="btn btn-sm btn-light ml-2">Update Goal</a>
-                </div>
-            {% elif summary.total_calories > user.userprofile.calorie_goal|floatformat:"0"|add:"-100" %}
-                <div class="alert alert-warning">
-                    <strong>Almost there!</strong> You're close to your calorie limit ({{ user.userprofile.calorie_goal }} kcal). 
-                    <a href="{% url 'set_goal' %}" class="btn btn-sm btn-light ml-2">Update Goal</a>
-                </div>
-            {% else %}
-                <div class="alert alert-success">
-                    🎉 Great job! You're staying within your calorie goal of {{ user.userprofile.calorie_goal }} kcal. Keep it up!
-                    <a href="{% url 'set_goal' %}" class="btn btn-sm btn-light ml-2">Update Goal</a>
-                </div>
-            {% endif %}
+            <div id="goalAlert" class="alert 
+                {% if summary.total_calories > user.userprofile.calorie_goal %}
+                    alert-danger
+                {% elif summary.total_calories > user.userprofile.calorie_goal|floatformat:"0"|add:"-100" %}
+                    alert-warning
+                {% else %}
+                    alert-success
+                {% endif %}
+            ">
+                <span id="goalMessage">
+                    {% if summary.total_calories > user.userprofile.calorie_goal %}
+                        <strong>Warning:</strong> You've exceeded your daily calorie goal of 
+                        <span id="goalValue">{{ user.userprofile.calorie_goal }}</span> kcal.
+                    {% elif summary.total_calories > user.userprofile.calorie_goal|floatformat:"0"|add:"-100" %}
+                        <strong>Almost there!</strong> You're close to your calorie limit 
+                        (<span id="goalValue">{{ user.userprofile.calorie_goal }}</span> kcal).
+                    {% else %}
+                        🎉 Great job! You're staying within your calorie goal of 
+                        <span id="goalValue">{{ user.userprofile.calorie_goal }}</span> kcal. Keep it up!
+                    {% endif %}
+                </span>
+                <button class="btn btn-sm btn-light ml-2" id="openGoalModal">Update Goal</button>
+            </div>
         {% else %}
             <div class="alert alert-info">
                 You haven't set a calorie goal yet. 
-                <a href="{% url 'set_goal' %}" class="btn btn-sm btn-primary ml-2">Set Your Goal</a>
+                <button class="btn btn-sm btn-primary ml-2" id="openGoalModal">Set Your Goal</button>
             </div>
         {% endif %}
-
     {% else %}
         <p class="text-center">No food items logged today.</p>
     {% endif %}
-
 </div>
 
+<!-- Modal for updating goal -->
+<div class="modal fade" id="goalModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-info text-white">
+        <h5 class="modal-title">Update Calorie Goal</h5>
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="goalForm">
+          {% csrf_token %}
+          <div class="form-group">
+            <label for="goalInput">Enter new goal (kcal):</label>
+            <input type="number" id="goalInput" class="form-control" 
+                   value="{{ user.userprofile.calorie_goal|default_if_none:'' }}" required>
+          </div>
+          <button type="submit" class="btn btn-success">Save Goal</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+$(document).ready(function(){
+
+    // open modal
+    $("#openGoalModal").click(function(){
+        $("#goalModal").modal("show");
+    });
+
+    // handle form submit
+    $("#goalForm").submit(function(e){
+        e.preventDefault();
+        let newGoal = $("#goalInput").val();
+
+        $.ajax({
+            url: "{% url 'set_goal' %}", // same Django view, must accept AJAX
+            type: "POST",
+            headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+            data: { calorie_goal: newGoal },
+            success: function(){
+                $("#goalValue").text(newGoal);
+                $("#goalModal").modal("hide");
+                $("#goalAlert").removeClass("alert-info alert-warning alert-danger alert-success")
+                               .addClass("alert-success");
+                $("#goalMessage").html(
+                    "🎉 Great job! You're staying within your calorie goal of <span id='goalValue'>" 
+                    + newGoal + "</span> kcal. Keep it up!"
+                );
+                alert("Goal updated successfully!");
+            },
+            error: function(){
+                alert("Error updating goal.");
+            }
+        });
+    });
+});
+</script>
+
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
 </body>
 </html>
