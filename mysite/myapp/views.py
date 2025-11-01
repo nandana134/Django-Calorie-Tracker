@@ -1,21 +1,28 @@
-from django.shortcuts import render, redirect, get_object_or_404 # type: ignore
+from django.shortcuts import render, redirect, get_object_or_404  # type: ignore
 from .models import Food, Consume, UserProfile
-from django.contrib.auth.models import User # type: ignore
-from django.contrib.auth.forms import UserCreationForm # type: ignore
-from django.contrib import messages # type: ignore
-from django.contrib.auth.decorators import login_required # type: ignore
-from django.db.models import Sum, Count # type: ignore
-from django.http import HttpResponse # type: ignore
-from django.template.loader import get_template # type: ignore
-from xhtml2pdf import pisa # type: ignore
-from django.utils import timezone # type: ignore
-from datetime import timedelta
-from .forms import CalorieGoalForm
-from .forms import CustomUserCreationForm
+from django.contrib.auth.models import User  # type: ignore
+from django.contrib import messages  # type: ignore
+from django.contrib.auth.decorators import login_required  # type: ignore
+from django.db.models import Sum, F  # type: ignore
+from django.http import HttpResponse, JsonResponse  # type: ignore
+from django.template.loader import get_template  # type: ignore
+from xhtml2pdf import pisa  # type: ignore
+from django.utils import timezone  # type: ignore
+from .forms import CalorieGoalForm, CustomUserCreationForm
 from collections import Counter
-from django.views.decorators.csrf import csrf_exempt 
+from django.views.decorators.csrf import csrf_exempt
+from django.db.models.functions import TruncDate
 
 
+# ---------------- Root Redirect ----------------
+def root_redirect(request):
+    if request.user.is_authenticated:
+        return redirect('index')  # Go to dashboard if logged in
+    else:
+        return redirect('login')  # Else go to login page
+
+
+# ---------------- Dashboard ----------------
 @login_required(login_url='login')
 def index(request):
     query = request.GET.get('q')
@@ -41,6 +48,7 @@ def index(request):
     })
 
 
+# ---------------- Register ----------------
 def register(request):
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
@@ -53,37 +61,58 @@ def register(request):
     return render(request, 'myapp/register.html', {'form': form})
 
 
+# ---------------- Delete Consumed Food (AJAX-only) ----------------
 @login_required(login_url='login')
 def delete_consume(request, id):
+    """
+    This view now assumes the frontend calls it via AJAX (POST).
+    It will return JSON responses only. Templates like delete.html are no longer used.
+    """
     consumed_food = get_object_or_404(Consume, id=id, user=request.user)
+
     if request.method == 'POST':
         consumed_food.delete()
-        return redirect('/')
-    return render(request, 'myapp/delete.html', {'item': consumed_food})
+        return JsonResponse({'status': 'success'})
+
+    # If someone hits the URL with GET (e.g., accidental browser visit), return a 405.
+    return JsonResponse({'status': 'error', 'message': 'Method not allowed'}, status=405)
 
 
+# ---------------- Edit Consumed Food (AJAX-only) ----------------
 @login_required(login_url='login')
 def edit_consume(request, id):
+    """
+    Accepts POST with either:
+      - 'food_id' (Food PK) OR
+      - 'food_consumed' (food name)
+    Returns JSON for AJAX clients. No template rendering because edit.html was removed.
+    """
     consumed_food = get_object_or_404(Consume, id=id, user=request.user)
 
     if request.method == 'POST':
+        food_id = request.POST.get('food_id')
         food_name = request.POST.get('food_consumed')
+
         try:
-            new_food = Food.objects.get(name=food_name)
+            if food_id:
+                new_food = Food.objects.get(id=food_id)
+            elif food_name:
+                new_food = Food.objects.get(name=food_name)
+            else:
+                return JsonResponse({'status': 'error', 'message': 'No food specified.'}, status=400)
+
             consumed_food.food_consumed = new_food
             consumed_food.save()
-            return redirect('index')
+            return JsonResponse({'status': 'success'})
+
         except Food.DoesNotExist:
-            messages.warning(request, "Food not found.")
+            return JsonResponse({'status': 'error', 'message': 'Food not found.'}, status=400)
 
-    foods = Food.objects.all()
-    return render(request, 'myapp/edit.html', {
-        'item': consumed_food,
-        'foods': foods,
-        'selected food':consumed_food.food_consumed.name
-    })
+    # Non-POST requests are rejected because editing is handled on the index page via JS.
+    return JsonResponse({'status': 'error', 'message': 'Method not allowed'}, status=405)
 
 
+# ---------------- Daily Summary ----------------
 @login_required(login_url='login')
 def daily_summary(request):
     today = timezone.now().date()
@@ -102,12 +131,15 @@ def daily_summary(request):
     })
 
 
+# ---------------- User Profile ----------------
 @login_required(login_url='login')
 def user_profile(request):
     history = Consume.objects.filter(user=request.user).order_by('-timestamp')
     return render(request, 'myapp/profile.html', {'history': history})
 
-@login_required
+
+# ---------------- PDF Report Generation ----------------
+@login_required(login_url='login')
 def generate_report_pdf(request):
     user = request.user
     history = Consume.objects.filter(user=user).order_by('timestamp')
@@ -115,7 +147,6 @@ def generate_report_pdf(request):
     generated_on = timezone.now().strftime("%Y-%m-%d")
 
     total_calories = history.aggregate(Sum('food_consumed__calories'))['food_consumed__calories__sum'] or 0
-
     average_calories = round(total_calories / total_days, 2) if total_days > 0 else 0
 
     # Most frequent food
@@ -123,9 +154,6 @@ def generate_report_pdf(request):
     frequent_food = Counter(food_names).most_common(1)[0][0] if food_names else 'N/A'
 
     # Daily calorie totals
-    from django.db.models.functions import TruncDate
-    from django.db.models import F
-
     daily_totals = (
         history
         .annotate(day=TruncDate('timestamp'))
@@ -186,8 +214,7 @@ def generate_report_pdf(request):
     return response
 
 
-
-
+# ---------------- Calorie Goal ----------------
 @login_required(login_url='login')
 def set_calorie_goal(request):
     profile, created = UserProfile.objects.get_or_create(user=request.user)
@@ -203,12 +230,17 @@ def set_calorie_goal(request):
 
     return render(request, 'myapp/set_goal.html', {'form': form})
 
+
+# ---------------- Home ----------------
+@login_required(login_url='login')
 def home(request):
     foods = Food.objects.all()
-    print("Number of foods:", foods.count())  #  Add this line
+    print("Number of foods:", foods.count())
     return render(request, 'tracker/home.html', {'foods': foods})
 
-@csrf_exempt  # optional but safe for a temporary view without CSRF token
+
+# ---------------- Import Food Data ----------------
+@csrf_exempt
 def import_food_data(request):
     import csv
     import os
@@ -223,11 +255,11 @@ def import_food_data(request):
                 if not Food.objects.filter(name=row['food item']).exists():
                     Food.objects.create(
                         name=row['food item'],
-                        carbs=float(row['carbs']),
-                        protein=float(row['protien']),
-                        fats=float(row['fats']),
-                        calories=int(row['calories'])
+                        carbs=float(row.get('carbs') or 0),
+                        protein=float(row.get('protien') or row.get('protein') or 0),
+                        fats=float(row.get('fats') or 0),
+                        calories=int(row.get('calories') or 0)
                     )
                     count += 1
-        return HttpResponse(f" Imported {count} food items successfully.")
-    return HttpResponse(" Invalid request method. Use GET.")
+        return HttpResponse(f"✅ Imported {count} food items successfully.")
+    return HttpResponse("⛔ Invalid request method. Use GET.")
