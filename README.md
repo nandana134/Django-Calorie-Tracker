@@ -111,7 +111,7 @@ Feel free to fork the project and open pull requests! Contributions are welcome 
 -📊 Export reports as Excel
 
 ### Live Demo
-[Calorie Tracker on Render](https://django-calorie-tracker-3d1h.onrender.com/)
+[Calorie Tracker on Render](https://django-calorie-tracker-6tq7.onrender.com/)
 
 **License**
 
